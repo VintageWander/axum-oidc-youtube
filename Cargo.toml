@@ -1,0 +1,41 @@
+[package]
+name = "axum-oidc-youtube"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# Async runtime
+tokio = { version = "1.37.0", features = ["macros", "rt-multi-thread"] }
+
+# Tracing and logging
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+tracing = { version = "0.1.40" }
+
+# Database
+sqlx = { version = "0.7.4", features = [
+    "runtime-tokio",
+    "tls-rustls",
+    "postgres",
+] }
+
+# Backend 
+axum = { version = "0.7.5" }
+axum-extra = { version = "0.9.3", features = ["typed-header"] }
+dotenvy = { version = "0.15.7" }
+
+# Serialization
+serde = { version = "1.0.200", features = ["derive"] }
+serde_json = { version = "1.0.116" }
+http-serde = { version = "2.1.0" }
+
+# Authentication
+openidconnect = { version = "3.5.0" }
+
+# Error handling
+thiserror = { version = "1.0.59" }
+
+# Docs
+utoipa = { version = "4.2.0" }
+utoipa-swagger-ui = { version = "6.0.0", features = ["axum"] }

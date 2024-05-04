@@ -1,0 +1,60 @@
+version: "3.9"
+
+name: "infra"
+
+services:
+  postgres-gui:
+    container_name: "postgres-gui"
+    image: "dpage/pgadmin4:latest"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@local.com"
+      PGADMIN_DEFAULT_PASSWORD: "password"
+    ports:
+      - 5050:80
+  postgres:
+    container_name: "postgres"
+    image: "postgres:latest"
+    environment:
+      POSTGRES_DB: "local"
+      POSTGRES_USER: "local"
+      POSTGRES_PASSWORD: "password"
+    entrypoint: >
+      sh -c "
+        echo 'createdb -O local authentik -U local' > /docker-entrypoint-initdb.d/initdb.sh;
+        docker-entrypoint.sh postgres;
+      "
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+  redis:
+    container_name: "redis"
+    image: "docker.io/library/redis:latest"
+    volumes:
+      - ./data/redis:/data
+  authentik:
+    container_name: "authentik"
+    image: "ghcr.io/goauthentik/server:latest"
+    entrypoint: >
+      sh -c "
+        ak server & ak worker
+      "
+    environment:
+      AUTHENTIK_SECRET_KEY: "localhostlocalhostlocalhostlocalhostlocalhost"
+      AUTHENTIK_ERROR_REPORTING__ENABLED: true
+      AUTHENTIK_REDIS__HOST: "redis"
+      AUTHENTIK_POSTGRESQL__NAME: "authentik"
+      AUTHENTIK_POSTGRESQL__HOST: "postgres"
+      AUTHENTIK_POSTGRESQL__USER: "local"
+      AUTHENTIK_POSTGRESQL__PASSWORD: "password"
+    ports:
+      - 9000:9000
+    user: root
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data/authentik/media:/media
+      - ./data/authentik/certs:/certs
+      - ./data/authentik/custom-templates:/templates
+    depends_on:
+      - postgres 
+      - redis
